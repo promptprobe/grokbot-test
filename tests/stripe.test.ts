@@ -2,12 +2,30 @@ import { describe, expect, it } from "vitest";
 import { check } from "../src/check.ts";
 import { stripeSign, stripeHmacRawBody } from "../src/providers/stripe.ts";
 import { utf8Encode, hexEncode } from "../src/core/bytes.ts";
+import { loadFixture } from "./helpers.ts";
 
 const SECRET = "whsec_test_secret_stripe_aaaaaaaa";
 const BODY = utf8Encode('{"id":"evt_whyhook_test"}');
 const TS = 1_700_000_000;
 
 describe("stripe", () => {
+  it("verifies an implementation-independent frozen vector via check() only", async () => {
+    const frozen = loadFixture<{
+      secret: string;
+      timestamp: number;
+      payload: string;
+      header: string;
+    }>("stripe-independent.json");
+    const result = await check({
+      provider: "stripe",
+      payload: utf8Encode(frozen.payload),
+      secret: frozen.secret,
+      headers: { "Stripe-Signature": frozen.header },
+      now: frozen.timestamp,
+    });
+    expect(result.status).toBe("verified");
+  });
+
   it("verifies a known t.payload vector", async () => {
     const headers = await stripeSign({ payload: BODY, secret: SECRET, timestamp: TS });
     const result = await check({

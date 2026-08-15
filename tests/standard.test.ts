@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { check } from "../src/check.ts";
 import { standardSign } from "../src/providers/standard.ts";
 import { utf8Encode, base64Encode } from "../src/core/bytes.ts";
+import { loadFixture } from "./helpers.ts";
 
 const SECRET_A = "whsec_" + base64Encode(utf8Encode("test_standard_webhook_secret"));
 const SECRET_B = "whsec_" + base64Encode(utf8Encode("rotated_standard_secret_b"));
@@ -10,6 +11,28 @@ const TS = 1_720_000_000;
 const ID = "msg_whyhook_test_0001";
 
 describe("standard webhooks", () => {
+  it("verifies the Standard Webhooks official vector via check() only", async () => {
+    const official = loadFixture<{
+      secret: string;
+      msgId: string;
+      timestamp: string;
+      payload: string;
+      signature: string;
+    }>("standard-official.json");
+    const result = await check({
+      provider: "standard",
+      payload: utf8Encode(official.payload),
+      secret: official.secret,
+      headers: {
+        "webhook-id": official.msgId,
+        "webhook-timestamp": official.timestamp,
+        "webhook-signature": official.signature,
+      },
+      now: Number(official.timestamp),
+    });
+    expect(result.status).toBe("verified");
+  });
+
   it("verifies a known vector with whsec_ secret", async () => {
     const headers = await standardSign({
       payload: BODY,
