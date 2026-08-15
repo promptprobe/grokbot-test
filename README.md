@@ -4,7 +4,7 @@ Local-first webhook signature debugger.
 
 Paste a raw HTTP body, the signature headers, and the signing secret. whyhook verifies GitHub, Stripe, Slack, and Standard Webhooks HMAC signatures on your machine, then ranks the usual reasons verification failed: JSON re-serialized after JSON.parse, a trailing newline, hex vs base64, a missing sha256= / v0= prefix, Stripe signing the raw body instead of t.payload, or a timestamp outside the replay window.
 
-Nothing is sent off-machine. Secrets are never logged. Human and JSON reports print only secret length and last 4 characters.
+Nothing is sent off-machine. Secrets are never logged. Reports show that a secret was provided, its length, and a short SHA-256 fingerprint (8 hex chars). Never the raw secret.
 
 ## Who it is for
 
@@ -30,7 +30,14 @@ Exit codes: 0 verified, 1 invalid signature, 2 usage or input error.
 
 ### Check a delivery
 
-GitHub official docs vector:
+Recommended: pass the signing secret with `--secret-file` so it does not appear on the command line.
+
+```
+printf 'Hello, World!' > /tmp/body.txt
+node dist/cli.js check --provider github --secret-file ./secret.txt --header "X-Hub-Signature-256: sha256=757107ea0eb2509fc211221cce984b8a37570b6d7586c22c46f4379c8b043e17" --payload-file /tmp/body.txt
+```
+
+`--secret` is convenience/testing only (for example the public GitHub docs vector `It's a Secret to Everybody`):
 
 ```
 printf 'Hello, World!' > /tmp/body.txt
@@ -81,9 +88,11 @@ Provider schemes:
 
 ## Environment variables
 
-None. Do not put signing secrets in .env files checked into git. Pass --secret / --secret-file or type the secret in the local UI.
+None. Do not put signing secrets in .env files checked into git. Pass `--secret-file` (recommended) or `--secret` (convenience/testing only), or type the secret in the local UI.
 
 ## Testing
+
+Run locally:
 
 ```
 npm test
@@ -92,7 +101,7 @@ npm run lint
 npm run build
 ```
 
-CI (.github/workflows/ci.yml) runs the same four steps on Node 22.
+A GitHub Actions workflow exists in the working tree at `.github/workflows/ci.yml` but could not be pushed because the GitHub token lacks the `workflow` scope. CI is not running on this GitHub repository.
 
 ## Security
 
