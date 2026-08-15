@@ -1,0 +1,38 @@
+{
+  "name": "whyhook",
+  "version": "0.1.0",
+  "description": "Local-first webhook signature debugger",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "bin": {
+    "whyhook": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc && vite build",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.web.json",
+    "test": "vitest run",
+    "lint": "tsc --noEmit && tsc --noEmit -p tsconfig.web.json",
+    "dev:ui": "vite",
+    "serve": "node dist/cli.js serve",
+    "whyhook": "node dist/cli.js"
+  },
+  "keywords": [
+    "webhook",
+    "signature",
+    "hmac"
+  ],
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@types/node": "^22.13.0",
+    "typescript": "^5.8.0",
+    "vite": "^6.2.0",
+    "vitest": "^3.0.0"
+  }
+}
