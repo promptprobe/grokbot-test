@@ -13,7 +13,7 @@ export function formatCheckHuman(result: CheckResult): string {
   }
   lines.push(result.message);
   if (result.secret) {
-    lines.push(`secret  length ${result.secret.length}, last4 ${result.secret.last4}`);
+    lines.push(`secret  provided, length ${result.secret.length}, fingerprint ${result.secret.fingerprint}`);
   }
   if (result.timestamp) {
     const skew = result.timestamp.skewSeconds;

@@ -1,3 +1,6 @@
+import { sha256Hex } from "./crypto.ts";
+import type { SecretHint } from "./types.ts";
+
 export function normalizeHeaders(
   headers: Record<string, string>,
 ): Map<string, { name: string; value: string }> {
@@ -58,9 +61,13 @@ export function parseSingleHeader(raw: string): { name: string; value: string } 
   return { name: raw.slice(0, idx).trim(), value: raw.slice(idx + 1).trim() };
 }
 
-export function secretHint(secret: string): { length: number; last4: string } {
-  const last4 = secret.length >= 4 ? secret.slice(-4) : "****";
-  return { length: secret.length, last4 };
+export async function secretHint(secret: string): Promise<SecretHint> {
+  const digest = await sha256Hex(secret);
+  return {
+    provided: true,
+    length: secret.length,
+    fingerprint: digest.slice(0, 8),
+  };
 }
 
 export function unixNowSeconds(now?: number): number {
@@ -72,5 +79,12 @@ export function parseUnixSeconds(value: string): number | null {
   if (!/^-?\d+$/.test(value.trim())) return null;
   const n = Number.parseInt(value.trim(), 10);
   if (!Number.isFinite(n)) return null;
+  return n;
+}
+
+export function parseNonNegativeInt(value: string): number | null {
+  if (!/^\d+$/.test(value)) return null;
+  const n = Number.parseInt(value, 10);
+  if (!Number.isFinite(n) || n < 0) return null;
   return n;
 }

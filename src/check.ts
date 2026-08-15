@@ -49,7 +49,7 @@ export async function check(input: CheckInput): Promise<CheckResult> {
       verified: false,
       message: resolved.error ?? "Provider is required.",
       diagnoses: [],
-      secret: secretHint(secret),
+      secret: await secretHint(secret),
     };
   }
   const provider = resolved.provider;
@@ -63,7 +63,7 @@ export async function check(input: CheckInput): Promise<CheckResult> {
       verified: false,
       message: `Missing required header${missing.length > 1 ? "s" : ""}: ${missing.join(", ")}.`,
       diagnoses: [],
-      secret: secretHint(secret),
+      secret: await secretHint(secret),
     };
   }
 
@@ -83,7 +83,7 @@ export async function check(input: CheckInput): Promise<CheckResult> {
       verified: false,
       message: `Missing required header${outcome.missingHeaders.length > 1 ? "s" : ""}: ${outcome.missingHeaders.join(", ")}.`,
       diagnoses: [],
-      secret: secretHint(secret),
+      secret: await secretHint(secret),
       timestamp: outcome.timestamp,
     };
   }
@@ -95,7 +95,7 @@ export async function check(input: CheckInput): Promise<CheckResult> {
       verified: true,
       message: verifiedMessage(provider),
       diagnoses: [],
-      secret: secretHint(secret),
+      secret: await secretHint(secret),
       timestamp: outcome.timestamp,
     };
   }
@@ -107,7 +107,7 @@ export async function check(input: CheckInput): Promise<CheckResult> {
     verified: false,
     message: invalidMessage(provider, outcome.reason),
     diagnoses,
-    secret: secretHint(secret),
+    secret: await secretHint(secret),
     timestamp: outcome.timestamp,
   };
 }

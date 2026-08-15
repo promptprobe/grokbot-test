@@ -47,7 +47,9 @@ describe("cli", () => {
     expect(dumped).not.toContain(secret);
     const parsed = JSON.parse(io.stdout.join(""));
     expect(parsed.status).toBe("invalid");
-    expect(parsed.secret.last4).toBe("_xyz");
+    expect(parsed.secret.provided).toBe(true);
+    expect(parsed.secret.length).toBe(secret.length);
+    expect(parsed.secret.fingerprint).toBe("9b5f349d");
   });
 
   it("empty secret is a usage error and does not crash", async () => {
@@ -116,6 +118,25 @@ describe("cli", () => {
   it("vector requires provider", async () => {
     const io = captureIo();
     const code = await run(["vector"], io.io);
+    expect(code).toBe(EXIT_USAGE);
+  });
+
+  it("rejects non-integer --tolerance as usage error", async () => {
+    const io = captureIo(text("body"));
+    const code = await run(
+      [
+        "check",
+        "--provider",
+        "github",
+        "--secret",
+        "x",
+        "--tolerance",
+        "300lol",
+        "--header",
+        "X-Hub-Signature-256: sha256=00",
+      ],
+      io.io,
+    );
     expect(code).toBe(EXIT_USAGE);
   });
 });

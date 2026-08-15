@@ -2,12 +2,30 @@ import { describe, expect, it } from "vitest";
 import { check } from "../src/check.ts";
 import { slackSign, slackHmac } from "../src/providers/slack.ts";
 import { utf8Encode, hexEncode } from "../src/core/bytes.ts";
+import { loadFixture } from "./helpers.ts";
 
 const SECRET = "slack_test_signing_secret_0001";
 const BODY = utf8Encode('{"type":"event_callback"}');
 const TS = 1_710_000_000;
 
 describe("slack", () => {
+  it("verifies an implementation-independent frozen vector via check() only", async () => {
+    const frozen = loadFixture<{
+      secret: string;
+      timestamp: number;
+      payload: string;
+      headers: Record<string, string>;
+    }>("slack-independent.json");
+    const result = await check({
+      provider: "slack",
+      payload: utf8Encode(frozen.payload),
+      secret: frozen.secret,
+      headers: frozen.headers,
+      now: frozen.timestamp,
+    });
+    expect(result.status).toBe("verified");
+  });
+
   it("verifies a known v0 vector", async () => {
     const headers = await slackSign({ payload: BODY, secret: SECRET, timestamp: TS });
     const result = await check({

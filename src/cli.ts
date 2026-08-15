@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import { resolve } from "node:path";
 import { check } from "./check.ts";
 import { isProviderId } from "./providers/index.ts";
-import { parseHeaderLines, parseSingleHeader } from "./core/headers.ts";
+import { parseHeaderLines, parseNonNegativeInt, parseSingleHeader } from "./core/headers.ts";
 import {
   formatCheckHuman,
   formatCheckJson,
@@ -75,7 +75,7 @@ vector options:
 
 Exit codes: 0 verified, 1 invalid, 2 usage/input error
 
-Secrets never leave this machine. Reports print length + last4 only.
+Secrets never leave this machine. Reports print provided + length + sha256 fingerprint (8 hex), never the raw secret.
 `;
 
 function stripNodeInvocation(argv: string[]): string[] {
@@ -152,15 +152,21 @@ async function runCheck(argv: string[], io: Io): Promise<number> {
     secret = text.replace(/(?:\r?\n)+$/u, "");
   }
   const payload = await readPayload(parsed.values["payload-file"], io);
-  const tolerance = parsed.values.tolerance
-    ? Number.parseInt(parsed.values.tolerance, 10)
-    : undefined;
-  const now = parsed.values.now ? Number.parseInt(parsed.values.now, 10) : undefined;
-  if (parsed.values.tolerance && !Number.isFinite(tolerance)) {
-    throw new Error("--tolerance must be an integer number of seconds");
+  let tolerance: number | undefined;
+  if (parsed.values.tolerance !== undefined) {
+    const parsedTolerance = parseNonNegativeInt(parsed.values.tolerance);
+    if (parsedTolerance === null) {
+      throw new Error("--tolerance must be a non-negative integer number of seconds");
+    }
+    tolerance = parsedTolerance;
   }
-  if (parsed.values.now && !Number.isFinite(now)) {
-    throw new Error("--now must be unix seconds");
+  let now: number | undefined;
+  if (parsed.values.now !== undefined) {
+    const parsedNow = parseNonNegativeInt(parsed.values.now);
+    if (parsedNow === null) {
+      throw new Error("--now must be unix seconds");
+    }
+    now = parsedNow;
   }
   const result = await check({
     provider: parsed.values.provider as ProviderId | undefined,
@@ -242,9 +248,13 @@ async function runServe(argv: string[], io: Io): Promise<number> {
     io.stdout(USAGE);
     return EXIT_OK;
   }
-  const port = parsed.values.port ? Number.parseInt(parsed.values.port, 10) : 8787;
-  if (!Number.isFinite(port) || port < 1 || port > 65535) {
-    throw new Error("--port must be 1–65535");
+  let port = 8787;
+  if (parsed.values.port !== undefined) {
+    const parsedPort = parseNonNegativeInt(parsed.values.port);
+    if (parsedPort === null || parsedPort < 1 || parsedPort > 65535) {
+      throw new Error("--port must be an integer 1-65535");
+    }
+    port = parsedPort;
   }
   const running = await startServer({ port, log: (msg) => io.stdout(msg) });
   await new Promise((resolveWait) => {

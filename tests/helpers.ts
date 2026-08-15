@@ -1,3 +1,7 @@
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
 import { utf8Encode } from "../src/core/bytes.ts";
 import type { Io } from "../src/cli.ts";
 
@@ -23,4 +27,9 @@ export function captureIo(stdin: Uint8Array = new Uint8Array(), files: Record<st
 
 export function joined(parts: string[]): string {
   return parts.join("");
+}
+
+export function loadFixture<T>(name: string): T {
+  const dir = join(dirname(fileURLToPath(import.meta.url)), "fixtures");
+  return JSON.parse(readFileSync(join(dir, name), "utf8")) as T;
 }

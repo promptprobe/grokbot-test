@@ -37,7 +37,9 @@ describe("github", () => {
       headers: { "X-Hub-Signature-256": GITHUB_OFFICIAL_VECTOR.header },
     });
     expect(result.status).toBe("invalid");
-    expect(result.secret?.last4).toBe("-one");
+    expect(result.secret?.provided).toBe(true);
+    expect(result.secret?.length).toBe("wrong-secret-not-the-real-one".length);
+    expect(result.secret?.fingerprint).toBe("f4a5fad5");
     expect(JSON.stringify(result)).not.toContain("wrong-secret-not-the-real-one");
   });
 
