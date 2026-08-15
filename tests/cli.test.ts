@@ -47,7 +47,9 @@ describe("cli", () => {
     expect(dumped).not.toContain(secret);
     const parsed = JSON.parse(io.stdout.join(""));
     expect(parsed.status).toBe("invalid");
-    expect(parsed.secret.last4).toBe("_xyz");
+    expect(parsed.secret.provided).toBe(true);
+    expect(parsed.secret.length).toBe(secret.length);
+    expect(parsed.secret.fingerprint).toBe("9b5f349d");
   });
 
   it("empty secret is a usage error and does not crash", async () => {
