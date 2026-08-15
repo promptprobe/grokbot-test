@@ -137,7 +137,7 @@ function renderResult(result: CheckResult): void {
   }
   const bits: string[] = [];
   if (result.provider) bits.push(`provider ${result.provider}`);
-  if (result.secret) bits.push(`secret length ${result.secret.length}, last4 ${result.secret.last4}`);
+  if (result.secret) bits.push(`secret provided, length ${result.secret.length}, fingerprint ${result.secret.fingerprint}`);
   if (result.timestamp) {
     bits.push(
       `ts ${result.timestamp.value} · skew ${result.timestamp.skewSeconds}s · tol ${result.timestamp.toleranceSeconds}s`,
