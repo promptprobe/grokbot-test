@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark light" />
+    <title>whyhook — webhook signature debugger</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to main content</a>
+    <header class="top">
+      <div class="brand">
+        <span class="logo" aria-hidden="true">∫</span>
+        <div>
+          <h1>whyhook</h1>
+          <p class="tag">Local-first webhook signature debugger. Secrets never leave this browser.</p>
+        </div>
+      </div>
+      <p class="offline" title="No network requests. Verification uses Web Crypto in this page.">
+        offline · 127.0.0.1
+      </p>
+    </header>
+    <main id="main">
+      <form id="form" class="layout" autocomplete="off">
+        <section class="panel inputs" aria-labelledby="input-heading">
+          <h2 id="input-heading" class="sr-only">Request materials</h2>
+          <fieldset class="providers">
+            <legend>Provider</legend>
+            <div class="pills" role="radiogroup" aria-label="Webhook provider">
+              <label><input type="radio" name="provider" value="github" checked /> GitHub</label>
+              <label><input type="radio" name="provider" value="stripe" /> Stripe</label>
+              <label><input type="radio" name="provider" value="slack" /> Slack</label>
+              <label><input type="radio" name="provider" value="standard" /> Standard</label>
+            </div>
+          </fieldset>
+          <div class="field">
+            <label for="payload">Raw body</label>
+            <textarea id="payload" name="payload" rows="10" spellcheck="false" placeholder='{"hello":"world"}'></textarea>
+            <p class="hint" id="payload-hint">Exact bytes the provider signed. Do not pretty-print.</p>
+          </div>
+          <div class="field">
+            <label for="headers">Signature headers</label>
+            <textarea id="headers" name="headers" rows="6" spellcheck="false" placeholder="X-Hub-Signature-256: sha256=…"></textarea>
+            <p class="hint">HTTP-style lines or a JSON object. Names are case-insensitive.</p>
+          </div>
+          <div class="field secret-field">
+            <label for="secret">Signing secret</label>
+            <div class="secret-row">
+              <input id="secret" name="secret" type="password" autocomplete="off" spellcheck="false" />
+              <button type="button" id="toggle-secret" aria-pressed="false">Show</button>
+            </div>
+            <p class="hint">Stays in memory only. Reports show length and last 4 characters.</p>
+          </div>
+          <div class="actions">
+            <button type="submit" class="primary">Verify</button>
+            <button type="button" id="fill-vector" class="ghost">Fill sample vector</button>
+            <button type="reset" class="ghost">Clear</button>
+          </div>
+        </section>
+        <section class="panel result" aria-labelledby="result-heading">
+          <h2 id="result-heading">Result</h2>
+          <div id="status" class="status empty" role="status" aria-live="polite">
+            <p class="status-kicker">empty</p>
+            <p class="status-title">Paste a body, headers, and secret.</p>
+            <p class="status-detail">Verification runs entirely in this page with Web Crypto. Nothing is posted to the local server.</p>
+          </div>
+          <div id="meta" class="meta" hidden></div>
+          <ol id="diagnoses" class="diagnoses" hidden></ol>
+          <div class="result-actions">
+            <button type="button" id="copy-vector" class="ghost" disabled>Copy as vector</button>
+          </div>
+        </section>
+      </form>
+    </main>
+    <footer class="foot">
+      <p>
+        GitHub · Stripe · Slack · Standard Webhooks. Not a production verifier.
+        Timestamp skew uses this machine's clock. Ed25519 <code>v1a</code> is not implemented.
+      </p>
+    </footer>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>
