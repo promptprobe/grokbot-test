@@ -13,8 +13,9 @@ export interface Diagnosis {
 }
 
 export interface SecretHint {
+  provided: true;
   length: number;
-  last4: string;
+  fingerprint: string;
 }
 
 export interface TimestampInfo {

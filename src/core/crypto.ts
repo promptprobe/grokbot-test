@@ -39,6 +39,12 @@ export async function hmacSha256Base64(
   return base64Encode(await hmacSha256(secret, payload));
 }
 
+export async function sha256Hex(data: Uint8Array | string): Promise<string> {
+  const bytes = typeof data === "string" ? utf8Encode(data) : data;
+  const digest = await getSubtle().digest("SHA-256", toArrayBuffer(bytes));
+  return hexEncode(new Uint8Array(digest));
+}
+
 function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
   const copy = new Uint8Array(bytes);
   return copy.buffer;
