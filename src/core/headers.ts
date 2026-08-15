@@ -81,3 +81,10 @@ export function parseUnixSeconds(value: string): number | null {
   if (!Number.isFinite(n)) return null;
   return n;
 }
+
+export function parseNonNegativeInt(value: string): number | null {
+  if (!/^\d+$/.test(value)) return null;
+  const n = Number.parseInt(value, 10);
+  if (!Number.isFinite(n) || n < 0) return null;
+  return n;
+}

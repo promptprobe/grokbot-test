@@ -120,4 +120,23 @@ describe("cli", () => {
     const code = await run(["vector"], io.io);
     expect(code).toBe(EXIT_USAGE);
   });
+
+  it("rejects non-integer --tolerance as usage error", async () => {
+    const io = captureIo(text("body"));
+    const code = await run(
+      [
+        "check",
+        "--provider",
+        "github",
+        "--secret",
+        "x",
+        "--tolerance",
+        "300lol",
+        "--header",
+        "X-Hub-Signature-256: sha256=00",
+      ],
+      io.io,
+    );
+    expect(code).toBe(EXIT_USAGE);
+  });
 });
